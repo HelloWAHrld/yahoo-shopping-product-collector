@@ -17,7 +17,6 @@ APP_ID = os.environ.get("YAHOO_APP_ID")  # 環境変数から読む(コードに
 
 
 def safe_get(data, *keys):
-    """入れ子の辞書から、値を安全に取り出す。情報が欠けていればNoneを返す"""
     for key in keys:
         if not isinstance(data, dict):
             return None
