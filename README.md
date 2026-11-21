@@ -59,25 +59,19 @@ pip install requests pandas
 Windows PowerShellの場合：
 
 ```powershell
-$env:YAHOO_APP_ID="取得したアプリケーションID"
-```
-
-Windows PowerShellの場合：
-
-```powershell
-$env:YAHOO_CLIENT_ID="取得したClient ID"
+$env:YAHOO_APP_ID="取得したClient ID"
 ```
 
 Windows コマンドプロンプトの場合：
 
 ```cmd
-set "YAHOO_CLIENT_ID=取得したClient ID"
+set "YAHOO_APP_ID=取得したClient ID"
 ```
 
 macOS / Linuxの場合：
 
 ```bash
-export YAHOO_CLIENT_ID="取得したClient ID"
+export YAHOO_APP_ID="取得したClient ID"
 ```
 
 ### 3. プログラムを実行
