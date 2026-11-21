@@ -6,11 +6,12 @@ import requests
 
 # ===== 設定(ここだけ書き換える) =====
 KEYWORD = "プロテイン"  # 検索する商品名
-MAX_PAGES = 2            # 取得するページ数
-RESULTS_PER_PAGE = 50    # 1ページあたりの件数
-SLEEP_SECONDS = 2        # リクエストの間隔(秒)
-OUTPUT_FILE = "yahoo_products.csv"
+MAX_RESULTS = 100  # 取得したい商品件数(1~999)
+OUTPUT_FILE = "yahoo_products.csv"  # 保存するファイル名
 # ====================================
+
+RESULTS_PER_PAGE = 50
+SLEEP_SECONDS = 2   
 
 API_URL = "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch"
 APP_ID = os.environ.get("YAHOO_APP_ID")  # 環境変数から読む(コードに直書きしない)
@@ -29,23 +30,37 @@ def main():
         print("環境変数 YAHOO_APP_ID が設定されていません。")
         return
 
+    if not isinstance(MAX_RESULTS, int) or not 1 <= MAX_RESULTS <= 999:
+        print("取得件数は1~999の範囲で指定してください。")
+        return
+
     rows = []
     error_occurred = False
-    for page in range(MAX_PAGES):
+    start = 1
+    page = 1
+
+    while len(rows) < MAX_RESULTS:
+        request_results = min(
+            RESULTS_PER_PAGE,
+            MAX_RESULTS - len(rows)
+        )
+                
         params = {
             "appid": APP_ID,
             "query": KEYWORD,
-            "results": RESULTS_PER_PAGE,
-            "start": page * RESULTS_PER_PAGE + 1,
+            "results": request_results,
+            "start": start,
         }
+
         try:
             res = requests.get(API_URL, params=params, timeout=15)
         except requests.RequestException as e:
-            print("通信に失敗しました:", e)
+            print("通信に失敗しました:", type(e).__name__)
             error_occurred = True
             break
 
-        print(f"{page + 1}ページ目 ステータス: {res.status_code}")
+        print(f"{page}ページ目 ステータス: {res.status_code}")
+
         if res.status_code != 200:
             print("取得に失敗しました。")
             error_occurred = True
@@ -60,12 +75,14 @@ def main():
 
         if not isinstance(data, dict):
             print("APIレスポンスの形式が不正です。")
+            error_occurred = True
             break
 
         hits = data.get("hits")
 
         if not isinstance(hits, list):
             print("商品一覧の形式が不正です。")
+            error_occurred = True
             break
 
         if not hits:
@@ -84,6 +101,20 @@ def main():
                 print("1件の処理に失敗しました。:", e)
 
         print(f"  {len(hits)} 件取得")
+
+        start += len(hits)
+        page += 1
+
+        if len(rows) >= MAX_RESULTS:
+            break
+
+        if len(hits) < request_results:
+            break
+
+        if start + min(RESULTS_PER_PAGE, MAX_RESULTS - len(rows)) > 1000:
+            print("APIの取得上限に達しました。")
+            break
+
         time.sleep(SLEEP_SECONDS)
 
     df = pd.DataFrame(rows, columns=["商品名", "価格", "店舗名", "URL"])
