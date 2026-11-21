@@ -29,9 +29,7 @@ Yahoo!ショッピングAPIを利用して、指定したキーワードに関�
 | 設定項目 | 内容 |
 |---|---|
 | KEYWORD | 検索キーワード |
-| MAX_PAGES | 取得するページ数 |
-| RESULTS_PER_PAGE | 1ページあたりの取得件数 |
-| SLEEP_SECONDS | リクエスト間隔 |
+| MAX_RESULT | 取得する商品件数 |
 | OUTPUT_FILE | 出力ファイル名 |
 
 ## APIの取得方法
